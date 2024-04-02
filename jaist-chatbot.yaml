@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaist-chatbot
+  labels:
+    app: jaist-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaist-chatbot
+  template:
+    metadata:
+      labels:
+        app: jaist-chatbot
+    spec:
+      containers:
+      - name: jaist-chatbot
+        image: tdtu98/jaist_chatbot:v3
+        ports:
+        - containerPort: 80
+        env:
+        - name: ME_CONFIG_MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: openai-api-key
+        
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: jaist-chatbot-service
+  labels:
+    app: jaist-chatbot
+spec:
+  selector:
+    app: jaist-chatbot
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

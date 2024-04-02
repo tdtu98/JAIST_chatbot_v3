@@ -1,0 +1,48 @@
+# mongo.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: arm64v8/mongo:latest
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INIT_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: mongo-root-username
+        - name: MONGO_INIT_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: mongo-root-password
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mongodb-service
+  labels:
+    app: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+

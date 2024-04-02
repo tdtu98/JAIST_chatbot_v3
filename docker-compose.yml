@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  mongodb:
+    image: arm64v8/mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      -  27017:27017
+    volumes:
+      - mongo-data:/data/db
+
+
+  mongo-express:
+    image: arm64v8/mongo-express:latest
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://admin:secret@mongo:27017/
+    ports:
+      - 8081:8081
+
+  jaist-chatbot:
+    image: jaist_chatbot:v2
+    build:
+      dockerfile: app/Dockerfile
+    container_name: jaist_chatbot
+    ports:
+    - 80:80
+
+volumes:
+  mongo-data:
+    driver: local
+
+
