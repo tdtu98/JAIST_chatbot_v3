@@ -89,7 +89,7 @@ async def get_user(infor: UserInfor):
     except:
         return {"message":"error"}
     if user_infor is None:
-        db.user.insert_one({"username": infor.username, "password": infor.password, "history": []})
+        db.user.insert_one({"username": infor.username, "password": infor.password})
         return {"message":"success"}
     else:
         return {"message":"error"}
