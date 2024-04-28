@@ -4,20 +4,20 @@ kind: Deployment
 metadata:
   name: mongodb-deployment
   labels:
-    app: mongo
+    app: {{.Values.db.name}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo
+      app: {{.Values.db.name}}
   template:
     metadata:
       labels:
-        app: mongo
+        app: {{.Values.db.name}}
     spec:
       containers:
-      - name: mongo
-        image: arm64v8/mongo:latest
+      - name: {{.Values.db.name}}
+        image: "{{.Values.db.image.name}}:{{.Values.db.image.tag}}"
         ports:
         - containerPort: 27017
         env:
@@ -31,16 +31,23 @@ spec:
             secretKeyRef:
               name: app-secret
               key: mongo-root-password
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata: 
-  name: mongodb-service
+  name: {{.Values.db.service.name}}
   labels:
-    app: mongo
+    app: {{.Values.db.name}}
 spec:
   selector:
-    app: mongo
+    app: {{.Values.db.name}}
   ports:
     - protocol: TCP
       port: 27017

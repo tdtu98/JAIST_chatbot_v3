@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 500Mi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: default
+    name: mongo-pvc
+  csi:
+    driver: pd.csi.storage.gke.io
+    volumeHandle: projects/jaist-chatbot/zones/asia-southeast1-b/disks/mongo-disk
+    fsType: ext4

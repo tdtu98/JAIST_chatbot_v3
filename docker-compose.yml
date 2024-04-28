@@ -21,10 +21,12 @@ services:
       - 8081:8081
 
   jaist-chatbot:
-    image: jaist_chatbot:v2
+    image: jaist_chatbot:v3
     build:
       dockerfile: app/Dockerfile
     container_name: jaist_chatbot
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://admin:secret@mongo:27017/
     ports:
     - 80:80
 

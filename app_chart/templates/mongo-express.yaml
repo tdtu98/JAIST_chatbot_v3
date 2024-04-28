@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-express
+  name: {{.Values.dbUI.name}}
   labels:
-    app: mongo-express
+    app: {{.Values.dbUI.name}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo-express
+      app: {{.Values.dbUI.name}}
   template:
     metadata:
       labels:
-        app: mongo-express
+        app: {{.Values.dbUI.name}}
     spec:
       containers:
-      - name: mongo-express
-        image: arm64v8/mongo-express:latest
+      - name: {{.Values.dbUI.name}}
+        image: "{{.Values.dbUI.image.name}}:{{.Values.dbUI.image.tag}}"
         ports:
         - containerPort: 8081
         env:
@@ -29,14 +29,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata: 
-  name: mongo-express-service
+  name: {{.Values.dbUI.service.name}}
 spec:
   selector:
-    app: mongo-express
-  # type: LoadBalancer
+    app: {{.Values.dbUI.name}}
   ports:
     - protocol: TCP
       port: 8081
       targetPort: 8081
-      # nodePort: 30000
 

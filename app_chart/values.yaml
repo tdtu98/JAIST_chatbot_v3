@@ -1,0 +1,26 @@
+app:
+  name: jaist-chatbot
+  image:
+    # name: asia-southeast1-docker.pkg.dev/jaist-chatbot/docker/jaist_chatbot
+    name: tdtu98/jaist_chatbot
+    tag: amd
+  service:
+    name: jaist-chatbot-service
+  ingress:
+    host: jaistchatbot.tdt
+
+db:
+  name: mongo
+  image:
+    name: mongo
+    tag: latest
+  service:
+    name: mongodb-service
+
+dbUI:
+  name: mongo-express
+  image:
+    name: mongo-express
+    tag: latest
+  service:
+    name: mongo-express-service

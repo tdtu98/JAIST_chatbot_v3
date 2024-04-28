@@ -1,5 +1,6 @@
 
 let userName; // global username is used as session key in retrieving the chat history
+let chatCount = 0; // global chatCount is used to updated the generated chat of chatbot.
 
 // this function is used to initialize the greeting message and login/signup form.
 (function init() {
@@ -19,7 +20,6 @@ let userName; // global username is used as session key in retrieving the chat h
 function showPopup() { 
     document.getElementById('popupOverlay').style.visibility = "visible";
 }
-
 
 function logSubmit(event) {
     event.preventDefault();
@@ -42,31 +42,76 @@ async function handleSendMessageRequest(event){
     userHtml.innerHTML= '<div class="outgoing-chats-img"><img src="static/assets/user.png" /></div><div class="outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">'+ textInput.value + '</p><span class="time">'+ receivedMessageTime +'</span></div></div>';
     messagePage.append(userHtml);
     textInput.value = "";
+
+
+
+    aiHTML = document.createElement("div");
+    aiHTML.className = "received-chats";
+    const outgoingMessageTime = new Date();
+    aiHTML.innerHTML = `<div class="received-chats-img"><img src="static/assets/ai.png" /></div> <div class="received-msg"><div class="received-msg-inbox"><p class="multi-msg" id=chatID${chatCount}> </p><span class="time">` + outgoingMessageTime + '</span></div></div>';
+    messagePage.append(aiHTML);
+    chatCount += 1;
     
-    response = await fetch('http://localhost:80/question/', {
+    response = await fetch("http://jaistchatbot.tdt/question/", {
         method: 'POST',
         body: JSON.stringify(
             {
             "question": question,
-            "username": "admin",
+            "username": userName,
             }
         ),
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
+    }).then(response => {
+        console.log("trigger event")
+        // Get the readable stream from the response body
+        const stream = response.body;
+        // Get the reader from the stream
+        const reader = stream.getReader();
+        // Define a function to read each chunk
+        const readChunk = () => {
+            // Read a chunk from the reader
+            reader.read()
+                .then(({
+                    value,
+                    done
+                }) => {
+                    // Check if the stream is done
+                    if (done) {
+                        // Log a message
+                        console.log('Stream finished');
+                        // Return from the function
+                        return;
+                    }
+                    // Convert the chunk value to a string
+                    const chunkString = new TextDecoder().decode(value);
+                    // Log the chunk string
+                    console.log("value",chunkString);
+                    updateAIChat(chunkString)
+                    // Read the next chunk
+                    readChunk();
+                })
+                .catch(error => {
+                    // Log the error
+                    console.error(error);
+                });
+        };
+        // Start reading the first chunk
+        readChunk();
+    })
+    .catch(error => {
+        // Log the error
+        console.error(error);
     });
+}
 
-    
-    const aiMessage = await response.json();
-    console.log("response", aiMessage.message);
-    
-
-    aiHTML = document.createElement("div");
-    aiHTML.className = "received-chats";
-    const outgoingMessageTime = new Date();
-    aiHTML.innerHTML = '<div class="received-chats-img"><img src="static/assets/ai.png" /></div> <div class="received-msg"><div class="received-msg-inbox"><p class="multi-msg">' + aiMessage.message +'</p><span class="time">' + outgoingMessageTime + '</span></div></div>';
-    messagePage.append(aiHTML);
+function updateAIChat(chunk) {
+    // Create a new paragraph element for each chunk and append it
+    const response = document.getElementById(`chatID${chatCount-1}`);
+    const node = document.createTextNode(chunk);
+    response.appendChild(node)
 }
 
 
@@ -79,7 +124,7 @@ async function login (event){
     const inputUserName = document.getElementById('username');
     const passWord = document.getElementById('password');
 
-    response = await fetch("http://localhost:80/login/", {
+    response = await fetch("http://jaistchatbot.tdt/login/", {
         method: 'POST',
         body: JSON.stringify(
             {
@@ -109,7 +154,7 @@ async function login (event){
 async function signUp(){
     const inputUserName = document.getElementById('username');
     const passWord = document.getElementById('password');
-    response = await fetch("http://localhost:80/signup/", {
+    response = await fetch("http://jaistchatbot.tdt/signup/", {
         method: 'POST',
         body: JSON.stringify(
             {

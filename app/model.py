@@ -7,21 +7,21 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.prompts import MessagesPlaceholder, ChatPromptTemplate, PromptTemplate
+from langchain.prompts import  PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.chat_models import ChatOpenAI
-from langchain_core.runnables import RunnablePassthrough, RunnableParallel, RunnableLambda
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel, RunnableLambda, RunnableBranch
 from langchain_core.output_parsers import StrOutputParser
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
-
+from langchain_community.llms import Ollama
 
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-# user = os.getenv('MONGO_INITDB_ROOT_USERNAME')
-# password = os.getenv('MONGO_INITDB_ROOT_PASSWORD')
+user = os.getenv('MONGO_INITDB_ROOT_USERNAME')
+password = os.getenv('MONGO_INITDB_ROOT_PASSWORD')
 
 def load_data(data_path):
         docs = []
@@ -71,40 +71,25 @@ class Chatbot():
         retriever = db.as_retriever(search_kwargs={"k":4}, search_type = "mmr")
 
         # chat model
-        llm = ChatOpenAI(model_name = "gpt-3.5-turbo", temperature = 0)
+        llm = ChatOpenAI(model_name = "gpt-3.5-turbo", temperature = 0, streaming = True, model_kwargs={"seed": 42})
 
         # we create a sub-chain that aims to rewrite a new question from input question and chat history
         # For example, if in history we mention about reporting missuse of funding in JAIST
         # and the next question is "what about I am outside of JAIST?", the model should know we want
         # to report missuse of fund in case we are outside of JAIST.
 
-        system_message = """
+        sub_template = """
         Given a chat history and the latest user question \
         which might reference context in the chat history, formulate a standalone question \
         which can be understood without the chat history. Do NOT answer the question, \
         just reformulate it if needed and otherwise return it as is.
+        -----------------------
+        History: {chat_history}
+        =======================
+        Human: {question}
+        Chatbot:
         """
-        sub_chat_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system",  system_message),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{question}")
-        ]
-        )
-        # local memory for strong chat histories
-        # self.memory = ConversationBufferMemory(
-        #     memory_key="chat_history",
-        #     input_key = "question",
-        #     return_messages=True
-        # )
-        # runnable_memory = RunnableLambda(self.memory.load_memory_variables) | itemgetter("chat_history")
-        # sub_chain = (
-        #     RunnableParallel(
-        #     chat_history = runnable_memory,
-        #     question = RunnablePassthrough()
-        #     ) |
-        #     sub_chat_prompt | llm | StrOutputParser()
-        # )
+        sub_chat_prompt = PromptTemplate.from_template(template = sub_template)
 
         # using mongodb to store chat histories
         self.chat_history = MongoDBChatMessageHistory(
@@ -121,19 +106,26 @@ class Chatbot():
             k = 5
         )
         runnable_memory = RunnableLambda(self.memory.load_memory_variables) | itemgetter("chat_history")
-        sub_chain = (
-            RunnableParallel(
+        sub_chain = ( RunnableParallel(
             chat_history = runnable_memory,
             question = RunnablePassthrough()
-            ) |
-            sub_chat_prompt | llm | StrOutputParser()
+            )
+            | RunnableBranch(
+            ( 
+            lambda x: not x.get("chat_history", False),
+            # If no chat history, then we just pass input to retriever
+            lambda x: x["question"]
+            ),
+            sub_chat_prompt | llm.with_config(tags =  ["sub_chain"]) | StrOutputParser(),
+            )  
         )
 
         # Our main chain that answers question based on information from retrieved documents (context)
         # chat history and rewrited question.
 
         template = """
-        Please only use the context behind to answer question!
+        You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
+        If you don't know the answer, just say that you don't know. Use minimum sentences and keep the answer concise.
         -----------------------
         Context: {context}
         -----------------------
@@ -146,26 +138,13 @@ class Chatbot():
         prompt = PromptTemplate.from_template(template= template)
 
         self.chain = (
+            sub_chain |
             RunnableParallel(
-            question = sub_chain,
+            question = RunnablePassthrough(),
             context = retriever,
             chat_history =  runnable_memory,
             )
             | prompt
-            | llm
+            | llm.with_config(tags =  ["main_chain"])
             | StrOutputParser()
         )
-        
-    #     self.chain = RunnableWithMessageHistory(
-    #     sub_chat_prompt | llm | StrOutputParser(),
-    #     self.memory,
-    #     input_messages_key="question",
-    #     history_messages_key="chat_history",
-    # )
-
-    def generate_response(self, user_input):
-        response = self.chain.invoke(user_input)
-        self.memory.chat_memory.add_user_message(user_input)
-        self.memory.chat_memory.add_ai_message(response)
-
-        return response
