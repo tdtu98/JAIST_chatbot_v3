@@ -1,7 +1,6 @@
 app:
   name: jaist-chatbot
   image:
-    # name: asia-southeast1-docker.pkg.dev/jaist-chatbot/docker/jaist_chatbot
     name: tdtu98/jaist_chatbot
     tag: amd
   service:
