@@ -1,0 +1,14 @@
+apiVersion: v2
+name: jaist_chatbot_chart
+description: A Helm chart for my chatbot app
+
+type: application
+
+version: 0.1.0
+
+
+appVersion: "1.0.0"
+
+maintainer:
+  - email: "tdtu98@gmail.com"
+    name: tdtu

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.dbUI.name}}
+  labels:
+    app: {{.Values.dbUI.name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.dbUI.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.dbUI.name}}
+    spec:
+      containers:
+      - name: {{.Values.dbUI.name}}
+        image: "{{.Values.dbUI.image.name}}:{{.Values.dbUI.image.tag}}"
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: {{.Values.dbUI.service.name}}
+spec:
+  selector:
+    app: {{.Values.dbUI.name}}
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.app.name}}
+  labels:
+    app: {{.Values.app.name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.app.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.app.name}}
+    spec:
+      containers:
+      - name: {{.Values.app.name}}
+        image: "{{.Values.app.image.name}}:{{.Values.app.image.tag}}"
+        ports:
+        - containerPort: 80
+        env:
+        - name: ME_CONFIG_MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: openai-api-key
+        
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: {{.Values.app.service.name}}
+  labels:
+    app: {{.Values.app.name}}
+spec:
+  selector:
+    app: {{.Values.app.name}}
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
