@@ -66,4 +66,34 @@ If we successfully deploy our app, you could view the status of our ```persisten
 
 Please check file [pv.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pv.yaml) and [mongo-pvc.yam](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pvc.yaml) which contain the settings about our pv and pvc to understand deeper.
 
+### Dynamic Provision
+In case you do not want to do the hard work, we could let the GKE dynamically provision pv for us. In file [mongo-pvc.yaml](), you could see the differences compared to the previous one when we provide ```storageClassName``` which defines our storage class to handle provisioner, parameter and claimPolicy for our pv.
+
+We use Helm to deploy our app again:
+```
+helm install mychatbot app_chart_dynamically_provisioning/
+```
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_pvc_bound_pv_2.png" alt="drawing" style="width:80%;"/>
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_new_disk.png" alt="drawing" style="width:80%;"/>
+</p>
+
+We could see our pvc is successfully bound to the new pv and a persistent disk is created in Compute Engine.
+### IPs and Hosts Name Matching
+
+At last, to access to our website, we need to match the IP of the ingress with our hosts name (please check [jaist-chatbot-ingress.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/jaist-chatbot-ingress.yaml)). We check the ingress ip with this command:
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/ingress_ip.png" alt="drawing" style="width:80%;"/>
+</p>
+
+Then we bind the IP with hosts name in ```/etc/hosts``` file:
+```
+sudo nano /etc/hosts
+```
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/ip_binding.png" alt="drawing" style="width:80%;"/>
+</p>
+
 ## ToDo
+- Deploy app as statefulset
+- Add Jenkins for CI/CD
