@@ -21,7 +21,8 @@ Then please activate two components that we will use in this project: ```Compute
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_enable_k8s_engine.png" width="400" height="226" /> 
 </p>
 
-Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install).
+Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install) and [```Helm```](https://helm.sh/docs/intro/install) locally.
 ## Usage
+
 
 ## ToDo
