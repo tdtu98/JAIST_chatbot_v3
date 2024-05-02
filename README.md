@@ -40,8 +40,30 @@ Then, connect to your cluster at the local terminal with command:
 # You can replace cluster name, project name and zone following your settings.
 gcloud container clusters get-credentials my-app --zone asia-southeast1-b --project jaist-chatbot
 ```
+
 As my project use ``Nginx Ingress Controller`` to expose itself for outside connections, we need to install it in our cluster:
 ```
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
 ```
+Since my app uses ```persistent volume (pv)```  for data storage, we have two ways to provide pv: ```manual provsision``` and ```dynamic provision```.
+
+### Manual Provision
+This requires you to create a ```persistent disk``` in ```compute engine``` by yourself. We will create a disk named ```mongo-disk``` with size ```10Gi``` at region ```asia-southeast1``` zone ```asia-southeast1-b```.
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_create_disk.png" alt="drawing" style="width:80%;"/>
+</p>
+
+Next, we use Helm to deploy our app:
+```
+# mychatbot is the released name of your app that you can change.
+# app_chart_manually_provisioning is the helm chart folder.
+helm install mychatbot app_chart_manually_provisioning/
+```
+If we successfully deploy our app, you could view the status of our ```persistent volume claim (pvc)``` which is bound to our pv named ```mongo-pv``` in Kubernetes Engine UI.
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_pvc_bound_pv.png" alt="drawing" style="width:80%;"/>
+</p>
+
+Please check file [pv.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pv.yaml) and [mongo-pvc.yam](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pvc.yaml) which contain the settings about our pv and pvc to understand deeper.
+
 ## ToDo
