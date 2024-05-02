@@ -15,6 +15,13 @@ First, you need to set up Google Cloud Platform (GCP) with project billing to cl
 </p>
 
 Then please activate two components that we will use in this project: ```Compute Engine``` and ```Kubernestes Engine```.
+
+<p float="center">
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_enable_compute_engine.png" width="400" />
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_enable_k8s_engine.png" width="400" height="226" /> 
+</p>
+
+Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install).
 ## Usage
 
 ## ToDo
