@@ -8,6 +8,13 @@ In this project, I focus on deploying my ChatBot on Google Cloud Kubernetes (GKE
 
 ## Requirements
 
+First, you need to set up Google Cloud Platform (GCP) with project billing to claim 300$. Next, go to [google cloud console](https://console.cloud.google.com/) and create new project with name such as ```JAIST-ChatBot```.
+
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_create_new_project.png" alt="drawing" style="width:80%;"/>
+</p>
+
+Then please activate two components that we will use in this project: ```Compute Engine``` and ```Kubernestes Engine```.
 ## Usage
 
 ## ToDo
