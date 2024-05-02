@@ -22,6 +22,26 @@ Then please activate two components that we will use in this project: ```Compute
 </p>
 
 Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install-sdk) and [```Helm```](https://helm.sh/docs/intro/install) locally.
+
+You can install other tools if needed:
+- [Docker](https://docs.docker.com/engine/install/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 ## Usage
-First go to your gcloud console in your project, please create new cluster in GKE with ```standard mode```. You can information for your cluster as name, zone, and number of nodes following these images:
+First go to your gcloud console in your project, please create new cluster in GKE with ```standard mode```. You can manage the settings of your cluster as name, zone, and number of nodes following these images:
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_cluster_basics.png" alt="drawing" style="width:80%;"/>
+</p>
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_cluster_node.png" alt="drawing" style="width:80%;"/>
+</p>
+
+Then, connect to your cluster at the local terminal with command:
+```
+# You can replace cluster name, project name and zone following your settings.
+gcloud container clusters get-credentials my-app --zone asia-southeast1-b --project jaist-chatbot
+```
+As my project use ``Nginx Ingress Controller`` to expose itself for outside connections, we need to install it in our cluster:
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
+```
 ## ToDo
