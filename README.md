@@ -21,8 +21,7 @@ Then please activate two components that we will use in this project: ```Compute
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_enable_k8s_engine.png" width="400" height="226" /> 
 </p>
 
-Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install) and [```Helm```](https://helm.sh/docs/intro/install) locally.
+Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.google.com/sdk/docs/install-sdk) and [```Helm```](https://helm.sh/docs/intro/install) locally.
 ## Usage
-
-
+First go to your gcloud console in your project, please create new cluster in GKE with ```standard mode```. You can information for your cluster as name, zone, and number of nodes following these images:
 ## ToDo
