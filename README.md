@@ -52,7 +52,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 ```
 Since my app uses ```persistent volume (pv)```  for data storage, we have two ways to provide pv: ```manual provsision``` and ```dynamic provision```.
 
-#### Manual Provision
+#### Manual Provisioner
 This requires you to create a ```persistent disk``` in ```compute engine``` by yourself. We will create a disk named ```mongo-disk``` with size ```10Gi``` at region ```asia-southeast1``` zone ```asia-southeast1-b```.
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_create_disk.png" alt="drawing" style="width:80%;"/>
@@ -71,7 +71,7 @@ If we successfully deploy our app, you could view the status of our ```persisten
 
 Please check file [pv.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pv.yaml) and [mongo-pvc.yam](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pvc.yaml) which contain the settings about our pv and pvc to understand deeper.
 
-#### Dynamic Provision
+#### Dynamic Provisioner
 In case you do not want to do the hard work, we could let the GKE dynamically provision pv for us. In file [mongo-pvc.yaml](), you could see the differences compared to the previous one when we provide ```storageClassName``` which defines our storage class to handle provisioner, parameter and claimPolicy for our pv.
 
 We use Helm to deploy our app again:
