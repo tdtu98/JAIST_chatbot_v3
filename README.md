@@ -4,7 +4,11 @@
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/diagram.png" alt="drawing" style="width:80%;"/>
 </p>
 
-In this project, I focus on deploying my ChatBot on Google Cloud Kubernetes (GKE). If you would like to understand more about my app which relies on RAG, please visit my previous project [JAIST_chatbot_v2](https://github.com/tdtu98/JAIST_Chatbot_v2).
+In this project, I focus on deploying my ChatBot on Google Kubernetes Engine (GKE). We have 3 main setup:
+- Manual/dynamic provisonser for persistent volume.
+- Stateful app using statefulsets of K8s and replica set of MongoDB.
+
+If you would like to understand more about my app which relies on RAG, please visit my previous project [JAIST_chatbot_v2](https://github.com/tdtu98/JAIST_Chatbot_v2).
 
 ## Requirements
 
@@ -26,7 +30,8 @@ Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.
 You can install other tools if needed:
 - [Docker](https://docs.docker.com/engine/install/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-## Usage
+### Usage
+
 First go to your ```gcloud console``` in your project, please create new cluster in GKE with ```standard mode```. You can manage the settings of your cluster as name, zone, and number of nodes following these images:
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_cluster_basics.png" alt="drawing" style="width:80%;"/>
@@ -93,6 +98,7 @@ sudo nano /etc/hosts
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/ip_binding.png" alt="drawing" style="width:80%;"/>
 </p>
+
 
 ## ToDo
 - Deploy app as statefulset
