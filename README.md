@@ -127,7 +127,7 @@ If the terminal pops up `{ ok: 1 }`, it means you succeed. Or, you can check the
 rs.status()
 ```
 
-In case you want to change [read preference)](https://www.mongodb.com/docs/manual/core/read-preference/) of the replica set, you could use this command:
+In case you want to change [read preference](https://www.mongodb.com/docs/manual/core/read-preference/) of the replica set, you could use this command:
 ```
 db.getMongo().setReadPref('mode')
 ```
