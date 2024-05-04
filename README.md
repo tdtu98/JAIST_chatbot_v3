@@ -105,7 +105,27 @@ After getting familliar with my setup, we move to a tougher part: stateful app. 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/diagram_stateful_app.png" alt="drawing" style="width:80%;"/>
 </p>
 
-In this setup, the MongoDB is deployed using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with three pods. The statefulsets enable each pod to have its own pv while deployments cannot. However, we need to use ```MogoDB replication``` for ```data synchronization``` between three pods as K8s does not take the responsibility. We set up ```mongo-0``` as the ```Primary``` database and the other two become ```Secondary``` databases.
+In this setup, the MongoDB is deployed using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with three pods. The statefulsets enable each pod to have its own pv while deployments cannot. However, we need to use [```MogoDB replication```](https://www.mongodb.com/docs/manual/replication/) for ```data synchronization``` between three pods as K8s does not take the responsibility. We set up ```mongo-0``` as the ```Primary``` database and the other two become ```Secondary``` databases.
+
+In pratice, you create a new cluster in GKE, setting up `Nginx Ingress Controller`, and adding `OPENAI_API_KEY` following the above directions. Next, we deploy our app using Helm:
+```
+helm install mychabot app_chart_stateful_app/
+```
+
+After all pods running up, we connect to `mongo-0` MongoDB shell as follows:
+```
+kubectl exec --stdin --tty mongo-0 -- mongosh
+```
+
+We initialize the replicaset with this command:
+```
+rs.initiate({"_id" : "rs0","members" : [{"_id" : 0, "host" : "mongo-0.mongodb-service.default.svc.cluster.local:27017",},{"_id" : 1,"host" : "mongo-1.mongodb-service.default.svc.cluster.local:27017",},{"_id" : 2,"host" : "mongo-2.mongodb-service.default.svc.cluster.local:27017",}]})
+```
+
+If the terminal pops up `{ ok: 1 }`, it means you succeed. Or, you can check the status using command:
+```
+rs.status()
+```
 
 
 ## ToDo
