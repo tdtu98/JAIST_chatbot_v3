@@ -1,4 +1,5 @@
 .vscode
 notes.txt
 app/.env
+.env
 .DS_Store

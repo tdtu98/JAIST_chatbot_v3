@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{.Values.db.name}}
+spec:
+  serviceName: {{.Values.db.service.name}}
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{.Values.db.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.db.name}}
+    spec:
+      containers:
+        - name: {{.Values.db.name}}
+          image: "{{.Values.db.image.name}}:{{.Values.db.image.tag}}"
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - "--bind_ip_all"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-data
+      spec:
+        storageClassName: standard
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.db.service.name}}
+  labels:
+    app: {{.Values.db.name}}
+spec:
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+  clusterIP: None
+  selector:
+    app: {{.Values.db.name}}
