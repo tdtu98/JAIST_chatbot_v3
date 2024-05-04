@@ -132,7 +132,7 @@ In case you want to change [read preference)](https://www.mongodb.com/docs/manua
 db.getMongo().setReadPref('mode')
 ```
 
-At last, you just need to config the ip and host matching to use our chatbot.
+At last, you just need to config the IPs and host names matching to use our chatbot.
 
 In notice, there is a signigicant change in our stateful app Helm chart. The `database_url/connection string/ME_CONFIG_MONGODB_URL` in [mongo-configmap.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_stateful_app/templates/mongo-configmap.yaml) becomes ```mongodb://mongo-0.mongodb-service.default.svc.cluster.local,mongo-1.mongodb-service.default.svc.cluster.local,mongo-2.mongodb-service.default.svc.cluster.local:27017/```. The reason behind this change is that statefulsets use headless service which does not contain ClusterIP. This requires each pod to have unchanged dns like `mongo-0.mongodb-service.default.svc.cluster.local:27017` for connection. The pod dns follows the template ```$statefulsets_name$-$statefulsets-service-name$.namespace.svc.cluster.local:port```.
 
