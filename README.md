@@ -100,12 +100,12 @@ sudo nano /etc/hosts
 </p>
 
 ### Stateful App
-After getting familliar with my setup, we move to a tougher part: stateful app. This is the diagram of my app:
+After warming up with the easy part, we move to a tougher one: stateful app. This is the diagram of my app:
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/diagram_stateful_app.png" alt="drawing" style="width:80%;"/>
 </p>
 
-In this setup, the MongoDB is deployed using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with three pods. The statefulsets enable each pod to have its own pv while deployments cannot. However, we need to use [```MogoDB replication```](https://www.mongodb.com/docs/manual/replication/) for ```data synchronization``` between three pods as K8s does not take the responsibility. We set up ```mongo-0``` as the ```Primary``` database and the other two become ```Secondary``` databases.
+In this setup, the MongoDB is deployed using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with three pods. The statefulsets enable each pod to have its own pv while deployments cannot. However, we need to use [`MogoDB replication`](https://www.mongodb.com/docs/manual/replication/) for `data synchronization` between three pods as K8s does not take the responsibility. We set up `mongo-0` as the `Primary` database and the other two become `Secondary` databases. In default setting, `Primary` database has the highest priority to read and write.
 
 In pratice, you create a new cluster in GKE, setting up `Nginx Ingress Controller`, and adding `OPENAI_API_KEY` following the above directions. Next, we deploy our app using Helm:
 ```
@@ -127,9 +127,14 @@ If the terminal pops up `{ ok: 1 }`, it means you succeed. Or, you can check the
 rs.status()
 ```
 
+In case you want to change [read preference)](https://www.mongodb.com/docs/manual/core/read-preference/) of the replica set, you could use this command:
+```
+db.getMongo().setReadPref('mode')
+```
+
 At last, you just need to config the ip and host matching to use our chatbot.
 
 In notice, there is a signigicant change in our stateful app Helm chart. The `database_url/connection string/ME_CONFIG_MONGODB_URL` in [mongo-configmap.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_stateful_app/templates/mongo-configmap.yaml) becomes ```mongodb://mongo-0.mongodb-service.default.svc.cluster.local,mongo-1.mongodb-service.default.svc.cluster.local,mongo-2.mongodb-service.default.svc.cluster.local:27017/```. The reason behind this change is that statefulsets use headless service which does not contain ClusterIP. This requires each pod to have unchanged dns like `mongo-0.mongodb-service.default.svc.cluster.local:27017` for connection. The pod dns follows the template ```$statefulsets_name$-$statefulsets-service-name$.namespace.svc.cluster.local:port```.
+
 ## ToDo
-- Deploy app as statefulset
 - Add Jenkins for CI/CD
