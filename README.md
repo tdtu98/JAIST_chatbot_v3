@@ -6,7 +6,7 @@
 
 In this project, I focus on deploying my ChatBot on Google Kubernetes Engine (GKE). We have 3 main setup:
 - Manual/dynamic provisonser for persistent volume.
-- Stateful app using statefulsets of K8s and replica set of MongoDB.
+- Stateful app using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) of K8s and replica set of MongoDB.
 
 If you would like to understand more about my app which relies on RAG, please visit my previous project [JAIST_chatbot_v2](https://github.com/tdtu98/JAIST_Chatbot_v2).
 
@@ -30,8 +30,8 @@ Next, you need to install ```gcloud CLI``` following this [guide](https://cloud.
 You can install other tools if needed:
 - [Docker](https://docs.docker.com/engine/install/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-### Usage
-
+## Usage
+### Manual/Dynamic Provisioner
 First go to your ```gcloud console``` in your project, please create new cluster in GKE with ```standard mode```. You can manage the settings of your cluster as name, zone, and number of nodes following these images:
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_cluster_basics.png" alt="drawing" style="width:80%;"/>
@@ -52,7 +52,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 ```
 Since my app uses ```persistent volume (pv)```  for data storage, we have two ways to provide pv: ```manual provsision``` and ```dynamic provision```.
 
-### Manual Provision
+#### Manual Provision
 This requires you to create a ```persistent disk``` in ```compute engine``` by yourself. We will create a disk named ```mongo-disk``` with size ```10Gi``` at region ```asia-southeast1``` zone ```asia-southeast1-b```.
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/gcloud_create_disk.png" alt="drawing" style="width:80%;"/>
@@ -71,7 +71,7 @@ If we successfully deploy our app, you could view the status of our ```persisten
 
 Please check file [pv.yaml](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pv.yaml) and [mongo-pvc.yam](https://github.com/tdtu98/JAIST_chatbot_v3/blob/main/app_chart_manually_provisioning/templates/pvc.yaml) which contain the settings about our pv and pvc to understand deeper.
 
-### Dynamic Provision
+#### Dynamic Provision
 In case you do not want to do the hard work, we could let the GKE dynamically provision pv for us. In file [mongo-pvc.yaml](), you could see the differences compared to the previous one when we provide ```storageClassName``` which defines our storage class to handle provisioner, parameter and claimPolicy for our pv.
 
 We use Helm to deploy our app again:
@@ -98,6 +98,14 @@ sudo nano /etc/hosts
 <p align="center"> 
   <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/ip_binding.png" alt="drawing" style="width:80%;"/>
 </p>
+
+### Stateful App
+After getting familliar with my setup, we move to a tougher part: stateful app. This is the diagram of my app:
+<p align="center"> 
+  <img src="https://github.com/tdtu98/JAIST_Chatbot_v3/blob/main/images/diagram_stateful_app.png" alt="drawing" style="width:80%;"/>
+</p>
+
+In this setup, the MongoDB is deployed using [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with three pods. The statefulsets enable each pod to have its own pv while deployments cannot. However, we need to use ```MogoDB replication``` for ```data synchronization``` between three pods as K8s does not take the responsibility. We set up ```mongo-0``` as the ```Primary``` database and the other two become ```Secondary``` databases.
 
 
 ## ToDo
